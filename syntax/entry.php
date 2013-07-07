@@ -112,6 +112,9 @@ class syntax_plugin_data_entry extends DokuWiki_Syntax_Plugin {
             case 'xhtml':
                 $this->_showData($data,$renderer);
                 return true;
+            case 'xml':
+                $this->_showDataXml($data,$renderer);
+                return true;
             case 'metadata':
                 $this->_saveData($data,$ID,$renderer->meta['title']);
                 return true;
@@ -172,6 +175,41 @@ class syntax_plugin_data_entry extends DokuWiki_Syntax_Plugin {
         }
         $ret .= '</dl></div>';
         $R->doc .= $ret;
+        if (method_exists($R, 'finishSectionEdit')) {
+            $R->finishSectionEdit($data['len'] + $data['pos']);
+        }
+    }
+
+    function _showDataXml($data,&$R){
+        global $ID;
+
+        if (method_exists($R, 'startSectionEdit')) {
+            $data['classes'] .= ' ' . $R->startSectionEdit($data['pos'], 'plugin_data');
+        }
+        $R->doc .= '<dataentry classes="'.$data['classes'].'">';
+        $class_names = array();
+        foreach($data['data'] as $key => $val){
+            if($val == '' || !count($val)) continue;
+            if(!is_array($val)) $val = array($val);
+            $type = $data['cols'][$key]['type'];
+            if (is_array($type)) $type = $type['type'];
+
+            $R->doc .= '<item class="'.hsc(sectionID($key, $class_names)).'">';
+            $R->doc .= '<key>'.hsc($data['cols'][$key]['title']).'</key>';
+            $R->doc .= '<values>';
+            foreach ($val as $v) {
+                switch ($type) {
+                    case 'pageid':
+                        $type = 'title';
+                    case 'wiki':
+                        $v = $ID . '|' . $v;
+                        break;
+                }
+                $R->doc .= '<value>'.$this->dthlp->_formatData($data['cols'][$key], $v,$R).'</value>';
+            }
+            $R->doc .= '</values></item>';
+        }
+        $R->doc .= '</dataentry>';
         if (method_exists($R, 'finishSectionEdit')) {
             $R->finishSectionEdit($data['len'] + $data['pos']);
         }
