@@ -183,9 +183,6 @@ class syntax_plugin_data_entry extends DokuWiki_Syntax_Plugin {
     function _showDataXml($data,&$R){
         global $ID;
 
-        if (method_exists($R, 'startSectionEdit')) {
-            $data['classes'] .= ' ' . $R->startSectionEdit($data['pos'], 'plugin_data');
-        }
         $R->doc .= '<dataentry classes="'.$data['classes'].'">';
         $class_names = array();
         foreach($data['data'] as $key => $val){
@@ -210,9 +207,6 @@ class syntax_plugin_data_entry extends DokuWiki_Syntax_Plugin {
             $R->doc .= '</values></item>';
         }
         $R->doc .= '</dataentry>';
-        if (method_exists($R, 'finishSectionEdit')) {
-            $R->finishSectionEdit($data['len'] + $data['pos']);
-        }
     }
 
     /**
